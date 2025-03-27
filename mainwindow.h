@@ -36,11 +36,15 @@ private:
     int x;
     int y;
     int sliderValue;
+    bool verticalLineSeriesActive;
     QVector<QLineSeries*> series;
     QLineSeries* currentLineSeries;
 
-    void setNewLineSeries(int &x, int &y);
+    void setNewLineSeries(int x, int y);
     void createLineSeries();
+    void createYLineSeries();
+    void horizontalLineSeries();
+    void verticalLineSeries();
     QLineSeries* getCurrentLineSeries(int& yValue);
 
 };

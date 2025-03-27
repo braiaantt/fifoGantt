@@ -13,6 +13,7 @@ MainWindow::MainWindow(QWidget *parent)
     x = 0;
     y = 0;
     sliderValue = 14;
+    verticalLineSeriesActive = false;
 
     chart = new QChart();
     chartView = new QChartView(chart);
@@ -71,44 +72,57 @@ void MainWindow::keyPressEvent(QKeyEvent* event){
 
     if (event->key() == Qt::Key_Up) {
         y++;
-        if(y >= 0 && y < 4){
-            createLineSeries();
-        } else {
-            qDebug()<<"Value Y not in range: "<<y;
-        }
-    }
-    else if (event->key() == Qt::Key_Down) {
+        verticalLineSeries();
+        setNewLineSeries(x,y-1);
+    } else if (event->key() == Qt::Key_Down) {
         y--;
-        if(y > 0){
-
-            if(y >= 0 && y < 4){
-                createLineSeries();
-            } else {
-                qDebug()<<"Value Y not in range: "<<y;
-            }
-        }
-    }
-    else if (event->key() == Qt::Key_Left) {
-        if(x>0){
-            x--;
-        }
-    }
-    else if (event->key() == Qt::Key_Right) {
+        verticalLineSeries();
+        setNewLineSeries(x,y+1);
+    } else if (event->key() == Qt::Key_Right) {
         x++;
         if(x == sliderValue){
             ui->graphicsView->horizontalScrollBar()->setValue(ui->graphicsView->horizontalScrollBar()->value() + 50);
             sliderValue++;
         }
+        horizontalLineSeries();
     }
 
     setNewLineSeries(x,y);
 
     // Llama al comportamiento por defecto
     QMainWindow::keyPressEvent(event);
+    //holasd
 
 }
 
-void MainWindow::setNewLineSeries(int &x, int &y){
+void MainWindow::horizontalLineSeries(){
+
+    if(verticalLineSeriesActive){
+
+        verticalLineSeriesActive = false;
+        createLineSeries();
+        setNewLineSeries(x-1, y);
+
+    }
+
+}
+
+void MainWindow::verticalLineSeries(){
+
+    if(!verticalLineSeriesActive){
+
+        createLineSeries();
+        QPen pen;
+        pen.setStyle(Qt::DashDotLine); // Cambia el estilo, puedes usar otras opciones como Qt::DotLine, Qt::DashLine, etc.
+        pen.setColor(Qt::gray); // Puedes cambiar el color de la línea si lo deseas
+        currentLineSeries->setPen(pen);
+        verticalLineSeriesActive = true;
+
+    }
+
+}
+
+void MainWindow::setNewLineSeries(int x, int y){
 
     currentLineSeries->append(x,y);
 
@@ -131,6 +145,16 @@ void MainWindow::createLineSeries(){
     if (!markers.isEmpty()) {
         markers.first()->setVisible(false); // Oculta el marcador en la leyenda
     }
+
+}
+
+void MainWindow::createYLineSeries(){
+
+    createLineSeries();
+    QPen pen;
+    pen.setStyle(Qt::DashLine); // Cambia el estilo, puedes usar otras opciones como Qt::DotLine, Qt::DashLine, etc.
+    pen.setColor(Qt::gray); // Puedes cambiar el color de la línea si lo deseas
+    currentLineSeries->setPen(pen);
 
 }
 
