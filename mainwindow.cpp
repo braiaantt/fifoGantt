@@ -15,11 +15,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     createProcesses();
     x = 0;
-    killPoint = -1;
-
     sliderValue = 14;
-    verticalLineSeriesActive = false;
-
 
     initCoreGraphic();
     initLegends();
@@ -145,7 +141,7 @@ void MainWindow::processing(){
 
     paintIoChart();
 
-    if(x >= 13){
+    if(x >= sliderValue){
         ui->graphicsView->horizontalScrollBar()->setValue(ui->graphicsView->horizontalScrollBar()->value() + 50);
         ui->graphicsView_2->horizontalScrollBar()->setValue(ui->graphicsView_2->horizontalScrollBar()->value() + 50);
     }
