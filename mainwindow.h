@@ -37,10 +37,7 @@ private:
     QStringList categories;
     QVector<QColor> colors;
     int x;
-    int y;
-    int killPoint;
     int sliderValue;
-    bool verticalLineSeriesActive;
     QLineSeries* currentLineSeries;
     QLineSeries* lineSeriesInputOutputOne;
     QLineSeries* lineSeriesInputOutputTwo;

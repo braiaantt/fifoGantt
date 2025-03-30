@@ -15,7 +15,6 @@ MainWindow::MainWindow(QWidget *parent)
 
     createProcesses();
     x = 0;
-    y = 0; // valor definido por el proceso que se inicie primero
     killPoint = -1;
 
     sliderValue = 14;
@@ -378,7 +377,7 @@ void MainWindow::markProcessKilled(){
     point->attachAxis(axisX);
     point->setPointsVisible(true);
 
-    if(y >= 0 && y < 4){
+    if(!readyQueue.empty()){
         point->setColor(colors[readyQueue[0]->getAxisY()]);
     }
 
