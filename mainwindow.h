@@ -8,6 +8,7 @@
 #include <QtCharts/QBarCategoryAxis>
 #include <QtCharts/QValueAxis>
 #include <QtCharts/QLineSeries>
+#include "process.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -27,25 +28,45 @@ protected:
 private:
     Ui::MainWindow *ui;
     QChart *chart;
-    QChartView *chartView;
-    QGraphicsScene *scene;
+    QChart *chartInputOutput;
     QValueAxis *axisX;
     QBarCategoryAxis *axisY;
+    QValueAxis *axisXInputOutput;
+    QBarCategoryAxis *axisYInputOutput;
+
     QStringList categories;
     QVector<QColor> colors;
     int x;
     int y;
+    int killPoint;
     int sliderValue;
     bool verticalLineSeriesActive;
-    QVector<QLineSeries*> series;
     QLineSeries* currentLineSeries;
+    QLineSeries* lineSeriesInputOutputOne;
+    QLineSeries* lineSeriesInputOutputTwo;
+    QVector<std::shared_ptr<Process>> processes;
+    QVector<std::shared_ptr<Process>> readyQueue;
+    QVector<std::shared_ptr<Process>> inputOutputOne;
+    QVector<std::shared_ptr<Process>> inputOutputTwo;
+    QVector<std::shared_ptr<Process>> arrivalProcesses;
 
-    void setNewLineSeries(int x, int y);
+    void updateCoords(int x, int y);
     void createLineSeries();
-    void createYLineSeries();
-    void horizontalLineSeries();
     void verticalLineSeries();
-    QLineSeries* getCurrentLineSeries(int& yValue);
+    void markProcessKilled();
+
+    void initCoreGraphic();
+    void initInputOutputGraphic();
+    void initAxis(int &axisXCount);
+    void initLegends();
+
+    void processing();
+    void checkArrivalProcesses();
+    void checkArrivalInputOutputProcesses(QVector<std::shared_ptr<Process>> &, int);
+    void sortArrivalProcesses();
+    void createProcesses();
+    void paintIoChart();
+    void createIoChartLineSeries(int);
 
 };
 #endif // MAINWINDOW_H
