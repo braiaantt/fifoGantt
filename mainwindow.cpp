@@ -17,17 +17,19 @@ MainWindow::MainWindow(QWidget *parent)
     x = 0;
     sliderValue = 14;
 
-    initCoreGraphic();
-    initLegends();
-    createLineSeries();
-
-    initInputOutputGraphic();
-    createIoChartLineSeries(1);
-    createIoChartLineSeries(0);
 
     QTimer::singleShot(0, this,[this](){
         ui->graphicsView->horizontalScrollBar()->setValue(0);
         ui->graphicsView_2->horizontalScrollBar()->setValue(0);
+
+        initCoreGraphic();
+        initLegends();
+        createLineSeries();
+
+        initInputOutputGraphic();
+        createIoChartLineSeries(1);
+        createIoChartLineSeries(0);
+
     });
 
 }
@@ -298,7 +300,6 @@ void MainWindow::initCoreGraphic(){
 
     chart = new QChart();
     QChartView *chartView = new QChartView(chart);
-    QGraphicsScene *scene = new QGraphicsScene(chart);
 
 
     chart->setTitle("Puto el que lee");
@@ -311,9 +312,9 @@ void MainWindow::initCoreGraphic(){
     chart->setMinimumWidth(axisX->tickCount()*50);
 
     chartView->setRenderHint(QPainter::Antialiasing);
-    scene->addWidget(chartView);
-    ui->graphicsView->setScene(scene);
-    chartView->setGeometry(0, 0, ui->graphicsView->width(), ui->graphicsView->height());
+    QLayout *layout = new QVBoxLayout(ui->graphicsView);
+    layout->setContentsMargins(0, 0, 0, 0);
+    layout->addWidget(chartView);
 
 }
 
@@ -390,7 +391,6 @@ void MainWindow::initInputOutputGraphic(){
 
     chartInputOutput = new QChart();
     QChartView *chartView = new QChartView(chartInputOutput);
-    QGraphicsScene *scene = new QGraphicsScene(chartInputOutput);
     axisYInputOutput = new QBarCategoryAxis(chartInputOutput);
     chartInputOutput->setAnimationOptions(QChart::SeriesAnimations);
 
@@ -413,9 +413,9 @@ void MainWindow::initInputOutputGraphic(){
     chartInputOutput->setMinimumWidth(axisX->tickCount()*50);
 
     chartView->setRenderHint(QPainter::Antialiasing);
-    scene->addWidget(chartView);
-    ui->graphicsView_2->setScene(scene);
-    chartView->setGeometry(0, 0, ui->graphicsView_2->width(), ui->graphicsView_2->height());
+    QLayout *layout = new QVBoxLayout(ui->graphicsView_2);
+    layout->setContentsMargins(0, 0, 0, 0);
+    layout->addWidget(chartView);
 }
 
 void MainWindow::createProcesses(){
