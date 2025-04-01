@@ -43,6 +43,7 @@ void MainWindow::keyPressEvent(QKeyEvent* event){
 
 void MainWindow::processing(){
 
+    ui->lineEditCurrentTimePos->setText(QString::number(x));
     qDebug()<<"";
     qDebug()<<"";
     qDebug()<<"";
@@ -56,14 +57,18 @@ void MainWindow::processing(){
     if(processesEnded == 1){
         lineSeriesInputOutputOne = nullptr;
         processManager.removeProcessFromIo(1);
+        delete ui->listWidgetInputOutputOne->takeItem(0);
     } else if(processesEnded == 2){
         lineSeriesInputOutputTwo = nullptr;
         processManager.removeProcessFromIo(2);
+        delete ui->listWidgetInputOutputTwo->takeItem(0);
     } else if(processesEnded == 3){
         lineSeriesInputOutputOne = nullptr;
         lineSeriesInputOutputTwo = nullptr;
         processManager.removeProcessFromIo(1);
         processManager.removeProcessFromIo(2);
+        delete ui->listWidgetInputOutputOne->takeItem(0);
+        delete ui->listWidgetInputOutputTwo->takeItem(0);
     }
 
     processManager.sortArrivalProcesses();
@@ -75,7 +80,7 @@ void MainWindow::processing(){
 
     std::shared_ptr<Process> currentProcess = processManager.getCurrentProcess();
 
-    qDebug()<<"Trabajando proceso: "<<currentProcess->getName();
+    ui->lineEditCurrentProcess->setText(currentProcess->getName());
 
     if(currentProcess->getCpuTime() == 0){
 
@@ -90,9 +95,11 @@ void MainWindow::processing(){
 
             if(currentProcess->getIoChannel() == 1){
                 qDebug()<<"Asignado a io 1";
+                ui->listWidgetInputOutputOne->addItem(currentProcess->getName());
                 ioChannel = 1;
             } else {
                 qDebug()<<"Asignado a io 2";
+                ui->listWidgetInputOutputTwo->addItem(currentProcess->getName());
                 ioChannel = 2;
             }
 
@@ -100,6 +107,7 @@ void MainWindow::processing(){
 
             currentProcess = processManager.getCurrentProcess();
             qDebug()<<"Nuevo proceso: "<<currentProcess->getName();
+            ui->lineEditCurrentProcess->setText(currentProcess->getName());
             verticalLineSeries(lastY);
 
             currentProcess->substractTime();
@@ -108,10 +116,13 @@ void MainWindow::processing(){
 
             qDebug()<<"Proceso "<<currentProcess->getName()<<" movido al final";
 
+            ui->listWidgetReadyQueue->addItem(ui->listWidgetReadyQueue->takeItem(0));
+
             int lastY = currentProcess->getAxisY();
             currentProcess->updateCpuTime();
             processManager.moveProcessToEnd();
             currentProcess = processManager.getCurrentProcess();
+            ui->lineEditCurrentProcess->setText(currentProcess->getName());
             verticalLineSeries(lastY);
 
             qDebug()<<"Nuevo proceso: "<<currentProcess->getName();
@@ -120,12 +131,16 @@ void MainWindow::processing(){
 
             qDebug()<<"Proceso muerto";
             markProcessKilled();
-            processManager.killProcess();//readyQueue.removeAt(0);
+            processManager.killProcess();
+            ui->lineEditCurrentProcess->setText("");
+            delete ui->listWidgetReadyQueue->takeItem(0);
+
             if(!processManager.readyQueueIsEmpty()){
 
                 int lastY = currentProcess->getAxisY();
                 currentProcess = processManager.getCurrentProcess();
                 qDebug()<<"Nuevo proceso: "<<currentProcess->getName();
+                ui->lineEditCurrentProcess->setText(currentProcess->getName());
                 verticalLineSeries(lastY);
                 currentProcess->substractTime();
 
