@@ -415,6 +415,12 @@ void MainWindow::on_pushButtonInitCharts_clicked()
         return;
     }
 
+    if(!checkIoInputs()){
+
+        QMessageBox::warning(this, "Error", "Solo puede haber un valor de I/O.");
+        return;
+    }
+
     QTableWidget* table = ui->tableWidgetProcessesData;
     QString name;
     int arrivalTime, firstCpuTime, secondCpuTime,inputOutputOne, inputOutputTwo, axisY;
@@ -455,6 +461,25 @@ bool MainWindow::checkInputsTableWidget(){
             item->text().toInt(&isInt);
             if(!isInt) return false;
 
+        }
+
+    }
+
+    return true;
+
+}
+
+bool MainWindow::checkIoInputs(){
+
+    QTableWidget *table = ui->tableWidgetProcessesData;
+
+    for(int i = 0; i<table->rowCount(); i++){
+
+        QTableWidgetItem* ioOne = table->item(i,3);
+        QTableWidgetItem* ioTwo = table->item(i,4);
+
+        if(ioOne->text().toInt() > 0 && ioTwo->text().toInt() > 0){
+            return false;
         }
 
     }

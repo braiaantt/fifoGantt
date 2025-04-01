@@ -62,6 +62,7 @@ private:
     void createIoChartLineSeries(int);
 
     bool checkInputsTableWidget();
+    bool checkIoInputs();
 
 };
 #endif // MAINWINDOW_H
