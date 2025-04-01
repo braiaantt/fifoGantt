@@ -4,6 +4,8 @@
 ProcessManager::ProcessManager()
 {
 
+    execProcess = nullptr;
+
 }
 
 void ProcessManager::addProcess(QString name, int arrivalTime, int firstCpuTime, int secondCpuTime, int ioTime, int ioChannel, int axisY){
@@ -77,17 +79,7 @@ void ProcessManager::sortArrivalProcesses(){
 
     if(arrivalProcesses.empty()) return;
 
-    qDebug()<<"------ArrivalProcesses antes------";
-    for(auto &process : arrivalProcesses){
-        qDebug()<<process->getName();
-    }
-    qDebug()<<"-----------------------------------";
-
-    if(arrivalProcesses.size() == 1){
-
-        readyQueue.append(arrivalProcesses);
-
-    } else if(arrivalProcesses.size() > 1){
+    if(arrivalProcesses.size() > 1){
 
         int size = arrivalProcesses.size();
         for (int i = 0; i < size - 1; ++i) {
@@ -98,15 +90,19 @@ void ProcessManager::sortArrivalProcesses(){
             }
         }
 
-        readyQueue.append(arrivalProcesses);
     }
 
-    qDebug()<<"------ArrivalProcesses despues------";
-    for(auto &process : arrivalProcesses){
-        qDebug()<<process->getName();
+}
+
+void ProcessManager::setArrivalProcessesOnReadyQueue(){
+
+
+    if(!arrivalProcesses.empty()){
+        qDebug()<<"seteando arrivalProcess a readyQueue";
+        readyQueue.append(arrivalProcesses);
+        arrivalProcesses.clear();
+        updateExecProcess();
     }
-    qDebug()<<"-----------------------------------";
-    arrivalProcesses.clear();
 
 }
 
@@ -124,21 +120,23 @@ bool ProcessManager::inputOutputTwoIsEmpty(){
     return inputOutputTwo.empty();
 }
 
-void ProcessManager::moveProcessFromReadyQueueToIo(int ioChannel){
+void ProcessManager::moveProcessFromExecToIo(int ioChannel){
 
     if(ioChannel == 1){
-        inputOutputOne.append(readyQueue[0]);
+        inputOutputOne.append(execProcess);
     } else {
-        inputOutputTwo.append(readyQueue[0]);
+        inputOutputTwo.append(execProcess);
     }
-    readyQueue.removeAt(0);
+    execProcess = nullptr;
+    updateExecProcess();
 
 }
 
 void ProcessManager::moveProcessToEnd(){
 
     readyQueue.move(0, readyQueue.size() - 1);
-
+    execProcess = nullptr;
+    updateExecProcess();
 }
 
 void ProcessManager::removeProcessFromIo(int ioChannel){
@@ -153,7 +151,17 @@ void ProcessManager::removeProcessFromIo(int ioChannel){
 
 void ProcessManager::killProcess(){
 
-    readyQueue.removeAt(0);
+    execProcess = nullptr;
+    updateExecProcess();
+}
+
+void ProcessManager::updateExecProcess(){
+
+    if(execProcess == nullptr && !readyQueue.empty()){
+        qDebug()<<"process: "<<readyQueue[0]->getName();
+        execProcess = readyQueue[0];
+        readyQueue.removeAt(0);
+    }
 
 }
 
@@ -172,8 +180,8 @@ QStringList ProcessManager::getProcessesNames(){
 
 }
 
-std::shared_ptr<Process> ProcessManager::getCurrentProcess(){
-    return readyQueue[0];
+std::shared_ptr<Process> ProcessManager::getExecProcess(){
+    return execProcess;
 }
 
 std::shared_ptr<Process> ProcessManager::getCurrentIoOneProcess(){
@@ -182,4 +190,18 @@ std::shared_ptr<Process> ProcessManager::getCurrentIoOneProcess(){
 
 std::shared_ptr<Process> ProcessManager::getCurrentIoTwoProcess(){
     return inputOutputTwo[0];
+}
+
+QStringList ProcessManager::getReadyQueueProcessesNames(){
+
+    QStringList names;
+
+    for(auto &process : readyQueue){
+
+        QString name = process->getName();
+        names << name;
+    }
+
+    return names;
+
 }

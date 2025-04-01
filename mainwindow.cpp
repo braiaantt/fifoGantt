@@ -47,6 +47,7 @@ void MainWindow::processing(){
     qDebug()<<"";
     qDebug()<<"";
     qDebug()<<"";
+    qDebug()<<x;
 
 
     processManager.checkArrivalProcesses(x);
@@ -72,60 +73,67 @@ void MainWindow::processing(){
     }
 
     processManager.sortArrivalProcesses();
+    processManager.setArrivalProcessesOnReadyQueue();
+    ui->listWidgetReadyQueue->clear();
+    ui->listWidgetReadyQueue->addItems(processManager.getReadyQueueProcessesNames());
 
-    if(processManager.readyQueueIsEmpty()){
-        qDebug()<<"ReadyQueue vacía!";
+    std::shared_ptr<Process> execProcess = processManager.getExecProcess();
+
+    if(!execProcess){
+        qDebug()<<"Sin procesos a ejecutar!";
         return;
     }
 
-    std::shared_ptr<Process> currentProcess = processManager.getCurrentProcess();
+    qDebug()<<"proceso a ejecutar: "<<execProcess->getName();
 
-    ui->lineEditCurrentProcess->setText(currentProcess->getName());
+    ui->lineEditCurrentProcess->setText(execProcess->getName());
 
-    if(currentProcess->getCpuTime() == 0){
+    if(execProcess->getCpuTime() == 0){
 
         qDebug()<<"Tiempo cpu terminado";
-        updateCoords(x,currentProcess->getAxisY());
+        updateCoords(x,execProcess->getAxisY());
 
-        if(currentProcess->getIoTime() != 0){
+        if(execProcess->getIoTime() != 0){
 
             int ioChannel;
-            int lastY = currentProcess->getAxisY();
-            currentProcess->updateCpuTime();
+            int lastY = execProcess->getAxisY();
+            execProcess->updateCpuTime();
 
-            if(currentProcess->getIoChannel() == 1){
+            if(execProcess->getIoChannel() == 1){
                 qDebug()<<"Asignado a io 1";
-                ui->listWidgetInputOutputOne->addItem(currentProcess->getName());
+                ui->listWidgetInputOutputOne->addItem(execProcess->getName());
                 ioChannel = 1;
             } else {
                 qDebug()<<"Asignado a io 2";
-                ui->listWidgetInputOutputTwo->addItem(currentProcess->getName());
+                ui->listWidgetInputOutputTwo->addItem(execProcess->getName());
                 ioChannel = 2;
             }
 
-            processManager.moveProcessFromReadyQueueToIo(ioChannel);
+            processManager.moveProcessFromExecToIo(ioChannel);
 
-            currentProcess = processManager.getCurrentProcess();
-            qDebug()<<"Nuevo proceso: "<<currentProcess->getName();
-            ui->lineEditCurrentProcess->setText(currentProcess->getName());
+            execProcess = processManager.getExecProcess();
+            qDebug()<<"Nuevo proceso: "<<execProcess->getName();
+            ui->lineEditCurrentProcess->setText(execProcess->getName());
+            delete ui->listWidgetReadyQueue->takeItem(0);
             verticalLineSeries(lastY);
 
-            currentProcess->substractTime();
+            execProcess->substractTime();
 
-        } else if(currentProcess->getCpuTime() > 0){
+        } else if(execProcess->getCpuTime() > 0){
 
-            qDebug()<<"Proceso "<<currentProcess->getName()<<" movido al final";
+            qDebug()<<"Proceso "<<execProcess->getName()<<" movido al final";
 
             ui->listWidgetReadyQueue->addItem(ui->listWidgetReadyQueue->takeItem(0));
 
-            int lastY = currentProcess->getAxisY();
-            currentProcess->updateCpuTime();
+            int lastY = execProcess->getAxisY();
+            execProcess->updateCpuTime();
             processManager.moveProcessToEnd();
-            currentProcess = processManager.getCurrentProcess();
-            ui->lineEditCurrentProcess->setText(currentProcess->getName());
+            execProcess = processManager.getExecProcess();
+            ui->lineEditCurrentProcess->setText(execProcess->getName());
+            delete ui->listWidgetReadyQueue->takeItem(0);
             verticalLineSeries(lastY);
 
-            qDebug()<<"Nuevo proceso: "<<currentProcess->getName();
+            qDebug()<<"Nuevo proceso: "<<execProcess->getName();
 
         } else {
 
@@ -135,14 +143,14 @@ void MainWindow::processing(){
             ui->lineEditCurrentProcess->setText("");
             delete ui->listWidgetReadyQueue->takeItem(0);
 
-            if(!processManager.readyQueueIsEmpty()){
+            if(processManager.getExecProcess() != nullptr){
 
-                int lastY = currentProcess->getAxisY();
-                currentProcess = processManager.getCurrentProcess();
-                qDebug()<<"Nuevo proceso: "<<currentProcess->getName();
-                ui->lineEditCurrentProcess->setText(currentProcess->getName());
+                int lastY = execProcess->getAxisY();
+                execProcess = processManager.getExecProcess();
+                qDebug()<<"Nuevo proceso: "<<execProcess->getName();
+                ui->lineEditCurrentProcess->setText(execProcess->getName());
                 verticalLineSeries(lastY);
-                currentProcess->substractTime();
+                execProcess->substractTime();
 
             } else {
                 qDebug()<<"No hay más procesos!";
@@ -151,7 +159,8 @@ void MainWindow::processing(){
         }
 
     } else {
-        currentProcess->substractTime();
+        execProcess->substractTime();
+        qDebug()<<"siga";
     }
 
     paintCoreChart();
@@ -174,8 +183,8 @@ void MainWindow::paintCoreChart(){
 
     }
 
-    if(!processManager.readyQueueIsEmpty()){
-        updateCoords(x, processManager.getCurrentProcess()->getAxisY());
+    if(processManager.getExecProcess() != nullptr){
+        updateCoords(x, processManager.getExecProcess()->getAxisY());
     }
 
 }
@@ -299,7 +308,7 @@ void MainWindow::verticalLineSeries(int lastY){
     currentLineSeries->setPen(pen);
 
     updateCoords(x,lastY);
-    updateCoords(x,processManager.getCurrentProcess()->getAxisY());
+    updateCoords(x,processManager.getExecProcess()->getAxisY());
 
     currentLineSeries = nullptr;
 
@@ -319,8 +328,8 @@ void MainWindow::createLineSeries(){
     lineSeries->attachAxis(axisX);
     currentLineSeries = lineSeries;
 
-    if(!processManager.readyQueueIsEmpty()){
-        lineSeries->setColor(colors[processManager.getCurrentProcess()->getAxisY()]);
+    if(processManager.getExecProcess() != nullptr){
+        lineSeries->setColor(colors[processManager.getExecProcess()->getAxisY()]);
     }
 
     auto markers = chart->legend()->markers(lineSeries);
@@ -338,16 +347,15 @@ void MainWindow::markProcessKilled(){
     point->attachAxis(axisX);
     point->setPointsVisible(true);
 
-    if(!processManager.readyQueueIsEmpty()){
-        point->setColor(colors[processManager.getCurrentProcess()->getAxisY()]);
+    if(processManager.getExecProcess() != nullptr){
+        point->setColor(colors[processManager.getExecProcess()->getAxisY()]);
+        point->append(x,processManager.getExecProcess()->getAxisY());
     }
 
     auto markers = chart->legend()->markers(point);
     if (!markers.isEmpty()) {
         markers.first()->setVisible(false); // Oculta el marcador en la leyenda
     }
-
-    point->append(x,processManager.getCurrentProcess()->getAxisY());
 
 }
 
