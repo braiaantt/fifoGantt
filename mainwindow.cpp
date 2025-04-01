@@ -9,7 +9,9 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
-    ui->setupUi(this);    
+    ui->setupUi(this);
+
+
 
     colors = {Qt::red, Qt::blue, Qt::green, Qt::cyan, Qt::darkRed};
 
@@ -300,17 +302,16 @@ void MainWindow::initCoreGraphic(){
     QChartView *chartView = new QChartView(chart);
     QGraphicsScene *scene = new QGraphicsScene(chart);
 
-
-    chart->setTitle("Puto el que lee");
     chart->setAnimationOptions(QChart::SeriesAnimations);
 
     initAxis(axisXCount);
 
     chart->addAxis(axisX, Qt::AlignBottom);
     chart->addAxis(axisY, Qt::AlignLeft);
-    chart->setMinimumWidth(axisX->tickCount()*50);
+    //chart->setMinimumWidth(axisX->tickCount()*50);
 
     chartView->setRenderHint(QPainter::Antialiasing);
+    chartView->setMinimumSize(axisX->tickCount() * 50, 300);
     scene->addWidget(chartView);
     ui->graphicsView->setScene(scene);
     chartView->setGeometry(0, 0, ui->graphicsView->width(), ui->graphicsView->height());
@@ -410,8 +411,8 @@ void MainWindow::initInputOutputGraphic(){
 
     chartInputOutput->addAxis(axisXInputOutput, Qt::AlignBottom);
     chartInputOutput->addAxis(axisYInputOutput, Qt::AlignLeft);
-    chartInputOutput->setMinimumWidth(axisX->tickCount()*50);
 
+    chartView->setMinimumSize(axisX->tickCount() * 50, 230);
     chartView->setRenderHint(QPainter::Antialiasing);
     scene->addWidget(chartView);
     ui->graphicsView_2->setScene(scene);
