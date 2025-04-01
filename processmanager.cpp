@@ -59,7 +59,6 @@ bool ProcessManager::checkIoList(QVector<std::shared_ptr<Process>> &ioList){
 
             qDebug()<<"Proceso "<<currentProcess->getName()<<" añadido a arrivalProcesses";
             arrivalProcesses.append(currentProcess);
-            ioList.removeOne(currentProcess);
 
             return true;
 
@@ -139,6 +138,16 @@ void ProcessManager::moveProcessFromReadyQueueToIo(int ioChannel){
 void ProcessManager::moveProcessToEnd(){
 
     readyQueue.move(0, readyQueue.size() - 1);
+
+}
+
+void ProcessManager::removeProcessFromIo(int ioChannel){
+
+    if(ioChannel == 1){
+        inputOutputOne.removeAt(0);
+    } else {
+        inputOutputTwo.removeAt(0);
+    }
 
 }
 

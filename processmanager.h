@@ -28,6 +28,7 @@ public:
     bool inputOutputTwoIsEmpty();
     void moveProcessFromReadyQueueToIo(int ioChannel);
     void moveProcessToEnd();
+    void removeProcessFromIo(int ioChannel);
     void killProcess();
 
     //getters

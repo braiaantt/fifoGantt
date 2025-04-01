@@ -43,20 +43,28 @@ void MainWindow::keyPressEvent(QKeyEvent* event){
 
 void MainWindow::processing(){
 
+    qDebug()<<"";
+    qDebug()<<"";
+    qDebug()<<"";
+
+
     processManager.checkArrivalProcesses(x);
 
     int processesEnded = processManager.checkArrivalInputOutputProcesses();
 
+    paintIoChart();
     if(processesEnded == 1){
         lineSeriesInputOutputOne = nullptr;
+        processManager.removeProcessFromIo(1);
     } else if(processesEnded == 2){
         lineSeriesInputOutputTwo = nullptr;
+        processManager.removeProcessFromIo(2);
     } else if(processesEnded == 3){
         lineSeriesInputOutputOne = nullptr;
         lineSeriesInputOutputTwo = nullptr;
+        processManager.removeProcessFromIo(1);
+        processManager.removeProcessFromIo(2);
     }
-    paintIoChart();
-
 
     processManager.sortArrivalProcesses();
 
