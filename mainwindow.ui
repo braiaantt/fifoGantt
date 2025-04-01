@@ -274,6 +274,9 @@
            <layout class="QHBoxLayout" name="horizontalLayout_4">
             <item>
              <widget class="QPushButton" name="pushButtonInitCharts">
+              <property name="focusPolicy">
+               <enum>Qt::NoFocus</enum>
+              </property>
               <property name="text">
                <string>Iniciar</string>
               </property>
@@ -281,6 +284,9 @@
             </item>
             <item>
              <widget class="QPushButton" name="pushButtonRestartCharts">
+              <property name="focusPolicy">
+               <enum>Qt::ClickFocus</enum>
+              </property>
               <property name="text">
                <string>Reiniciar</string>
               </property>
@@ -333,7 +339,11 @@
                </widget>
               </item>
               <item>
-               <widget class="QListWidget" name="listWidgetReadyQueue"/>
+               <widget class="QListWidget" name="listWidgetReadyQueue">
+                <property name="focusPolicy">
+                 <enum>Qt::NoFocus</enum>
+                </property>
+               </widget>
               </item>
              </layout>
             </item>
@@ -347,7 +357,11 @@
                </widget>
               </item>
               <item>
-               <widget class="QListWidget" name="listWidgetInputOutputOne"/>
+               <widget class="QListWidget" name="listWidgetInputOutputOne">
+                <property name="focusPolicy">
+                 <enum>Qt::NoFocus</enum>
+                </property>
+               </widget>
               </item>
              </layout>
             </item>
@@ -361,7 +375,11 @@
                </widget>
               </item>
               <item>
-               <widget class="QListWidget" name="listWidgetInputOutputTwo"/>
+               <widget class="QListWidget" name="listWidgetInputOutputTwo">
+                <property name="focusPolicy">
+                 <enum>Qt::NoFocus</enum>
+                </property>
+               </widget>
               </item>
              </layout>
             </item>

@@ -11,6 +11,8 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
+    chart = nullptr;
+    chartInputOutput = nullptr;
     currentLineSeries = nullptr;
     lineSeriesInputOutputOne = nullptr;
     lineSeriesInputOutputTwo = nullptr;
@@ -194,22 +196,21 @@ void MainWindow::createIoChartLineSeries(int ioChannel){
 void MainWindow::initAxis(){
 
     int axisXCount = calcAxisCount(); //valor calculado por el resultado de la suma de los tiempos de nucleo
-    qDebug()<<"aca";
+
     axisX = new QValueAxis();
     axisY = new QBarCategoryAxis();
-    qDebug()<<"aca";
+
     //Configuracion eje x
     axisX->setRange(0, axisXCount);
     axisX->setTickCount(axisXCount+1);
     axisX->setLabelFormat("%.0f");
     axisX->setTitleText("Tiempo");
     axisX->setGridLineVisible(false);
-    qDebug()<<"aca";
+
     // Configuracion eje y
     QStringList processesNames = processManager.getProcessesNames();
     axisY->append(processesNames);
     axisY->setGridLineVisible(false);
-    qDebug()<<"aca";
 
 }
 
@@ -242,16 +243,13 @@ int MainWindow::calcAxisCount(){
     int totalCpuTime = 0;
 
     for(int i = 0; i<table->rowCount(); i++){
-        qDebug()<<"i "<<i;
+
         int firstCpuTime = table->item(i,2)->text().toInt();
         int secondCpuTime = table->item(i,5)->text().toInt();
         totalCpuTime += firstCpuTime + secondCpuTime;
 
-        qDebug()<<"total: "<<totalCpuTime;
-
     }
 
-    qDebug()<<"total: "<<totalCpuTime;
     return totalCpuTime;
 
 }
@@ -379,9 +377,9 @@ void MainWindow::on_pushButtonInitCharts_clicked()
         secondCpuTime = table->item(i,5)->text().toInt();
 
         if(inputOutputOne != 0){
-            processManager.addProcess(name,arrivalTime,firstCpuTime,secondCpuTime,inputOutputOne,1,1);
+            processManager.addProcess(name,arrivalTime,firstCpuTime,secondCpuTime,inputOutputOne,1,i);
         } else {
-            processManager.addProcess(name,arrivalTime,firstCpuTime,secondCpuTime,inputOutputTwo,0,0);
+            processManager.addProcess(name,arrivalTime,firstCpuTime,secondCpuTime,inputOutputTwo,0,i);
         }
 
     }
