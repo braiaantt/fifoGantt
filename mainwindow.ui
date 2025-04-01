@@ -68,6 +68,12 @@
            <verstretch>0</verstretch>
           </sizepolicy>
          </property>
+         <property name="maximumSize">
+          <size>
+           <width>430</width>
+           <height>16777215</height>
+          </size>
+         </property>
          <layout class="QVBoxLayout" name="verticalLayout_3">
           <property name="spacing">
            <number>0</number>
@@ -325,6 +331,12 @@
            <layout class="QVBoxLayout" name="verticalLayout_7">
             <item>
              <widget class="QLabel" name="label_4">
+              <property name="maximumSize">
+               <size>
+                <width>80</width>
+                <height>16777215</height>
+               </size>
+              </property>
               <property name="text">
                <string>Proceso actual</string>
               </property>
@@ -338,6 +350,12 @@
               <property name="enabled">
                <bool>false</bool>
               </property>
+              <property name="maximumSize">
+               <size>
+                <width>80</width>
+                <height>16777215</height>
+               </size>
+              </property>
               <property name="alignment">
                <set>Qt::AlignCenter</set>
               </property>
@@ -345,6 +363,12 @@
             </item>
             <item alignment="Qt::AlignHCenter">
              <widget class="QLabel" name="label_5">
+              <property name="maximumSize">
+               <size>
+                <width>80</width>
+                <height>16777215</height>
+               </size>
+              </property>
               <property name="text">
                <string>Tiempo</string>
               </property>
@@ -354,6 +378,12 @@
              <widget class="QLineEdit" name="lineEditCurrentTimePos">
               <property name="enabled">
                <bool>false</bool>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>80</width>
+                <height>16777215</height>
+               </size>
               </property>
               <property name="alignment">
                <set>Qt::AlignCenter</set>
@@ -377,7 +407,7 @@
           </item>
           <item>
            <layout class="QVBoxLayout" name="verticalLayout_4">
-            <item>
+            <item alignment="Qt::AlignHCenter">
              <widget class="QLabel" name="label">
               <property name="text">
                <string>ReadyQueue</string>
@@ -389,6 +419,12 @@
             </item>
             <item>
              <widget class="QListWidget" name="listWidgetReadyQueue">
+              <property name="maximumSize">
+               <size>
+                <width>70</width>
+                <height>16777215</height>
+               </size>
+              </property>
               <property name="focusPolicy">
                <enum>Qt::NoFocus</enum>
               </property>
@@ -410,6 +446,12 @@
             </item>
             <item>
              <widget class="QListWidget" name="listWidgetInputOutputOne">
+              <property name="maximumSize">
+               <size>
+                <width>50</width>
+                <height>16777215</height>
+               </size>
+              </property>
               <property name="focusPolicy">
                <enum>Qt::NoFocus</enum>
               </property>
@@ -428,6 +470,30 @@
             </item>
             <item>
              <widget class="QListWidget" name="listWidgetInputOutputTwo">
+              <property name="maximumSize">
+               <size>
+                <width>50</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="focusPolicy">
+               <enum>Qt::NoFocus</enum>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QVBoxLayout" name="verticalLayout_8">
+            <item alignment="Qt::AlignHCenter">
+             <widget class="QLabel" name="label_6">
+              <property name="text">
+               <string>Logs</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QListWidget" name="listWidgetLogs">
               <property name="focusPolicy">
                <enum>Qt::NoFocus</enum>
               </property>

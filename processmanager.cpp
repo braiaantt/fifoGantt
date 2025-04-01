@@ -15,16 +15,20 @@ void ProcessManager::addProcess(QString name, int arrivalTime, int firstCpuTime,
 
 }
 
-void ProcessManager::checkArrivalProcesses(int x){
+QStringList ProcessManager::checkArrivalProcesses(int x){
+
+    QStringList logs;
 
     for(auto &process : processes){
         if(process->getArrivalTime() == x){
 
             arrivalProcesses.append(process);
-            qDebug()<<"Proceso"<< process->getName() <<"añadido a arrivalProcesses";
-
+            QString log = "Llegada de " + process->getName() + " a readyQueue en tiempo " + QString::number(x);
+            logs << log;
         }
     }
+
+    return logs;
 
 }
 
@@ -74,12 +78,13 @@ bool ProcessManager::checkIoList(QVector<std::shared_ptr<Process>> &ioList){
 
 }
 
-void ProcessManager::sortArrivalProcesses(){
+QStringList ProcessManager::sortArrivalProcesses(){
 
-
-    if(arrivalProcesses.empty()) return;
+    QStringList logs;
 
     if(arrivalProcesses.size() > 1){
+
+        logs << "Varios procesos entrando al mismo tiempo. Reorganizando...";
 
         int size = arrivalProcesses.size();
         for (int i = 0; i < size - 1; ++i) {
@@ -90,7 +95,11 @@ void ProcessManager::sortArrivalProcesses(){
             }
         }
 
+        logs << "Procesos reorganizados.";
+
     }
+
+    return logs;
 
 }
 

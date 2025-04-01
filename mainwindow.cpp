@@ -43,6 +43,8 @@ void MainWindow::keyPressEvent(QKeyEvent* event){
 
 void MainWindow::processing(){
 
+    QStringList logs;
+
     ui->lineEditCurrentTimePos->setText(QString::number(x));
     qDebug()<<"";
     qDebug()<<"";
@@ -50,20 +52,29 @@ void MainWindow::processing(){
     qDebug()<<x;
 
 
-    processManager.checkArrivalProcesses(x);
+    QStringList arrivalProcessesLogs = processManager.checkArrivalProcesses(x);
+    logs << arrivalProcessesLogs;
 
     int processesEnded = processManager.checkArrivalInputOutputProcesses();
 
     paintIoChart();
     if(processesEnded == 1){
+        QString logIoOne = "LLegada de " + ui->listWidgetInputOutputOne->item(0)->text() + " a readyQueue desde I/O₁ en tiempo "+QString::number(x);
+        logs<< logIoOne;
         lineSeriesInputOutputOne = nullptr;
         processManager.removeProcessFromIo(1);
         delete ui->listWidgetInputOutputOne->takeItem(0);
     } else if(processesEnded == 2){
+        QString logIoTwo = "Llegada de " + ui->listWidgetInputOutputTwo->item(0)->text() + " a readyQueue desde I/O₂ en tiempo "+QString::number(x);
+        logs << logIoTwo;
         lineSeriesInputOutputTwo = nullptr;
         processManager.removeProcessFromIo(2);
         delete ui->listWidgetInputOutputTwo->takeItem(0);
     } else if(processesEnded == 3){
+        QString logIoOne = "LLegada de " + ui->listWidgetInputOutputOne->item(0)->text() + " a readyQueue desde I/O₁ en tiempo "+QString::number(x);
+        QString logIoTwo = "LLegada de " + ui->listWidgetInputOutputTwo->item(0)->text() + " a readyQueue desde I/O₂ en tiempo "+QString::number(x);
+        logs << logIoOne;
+        logs << logIoTwo;
         lineSeriesInputOutputOne = nullptr;
         lineSeriesInputOutputTwo = nullptr;
         processManager.removeProcessFromIo(1);
@@ -72,7 +83,9 @@ void MainWindow::processing(){
         delete ui->listWidgetInputOutputTwo->takeItem(0);
     }
 
-    processManager.sortArrivalProcesses();
+    QStringList arrivalIoProcessesLogs = processManager.sortArrivalProcesses();
+    logs << arrivalIoProcessesLogs;
+
     processManager.setArrivalProcessesOnReadyQueue();
     ui->listWidgetReadyQueue->clear();
     ui->listWidgetReadyQueue->addItems(processManager.getReadyQueueProcessesNames());
@@ -84,13 +97,12 @@ void MainWindow::processing(){
         return;
     }
 
-    qDebug()<<"proceso a ejecutar: "<<execProcess->getName();
-
     ui->lineEditCurrentProcess->setText(execProcess->getName());
 
     if(execProcess->getCpuTime() == 0){
 
-        qDebug()<<"Tiempo cpu terminado";
+
+        logs.append("Tiempo cpu proceso "+execProcess->getName()+" terminado");
         updateCoords(x,execProcess->getAxisY());
 
         if(execProcess->getIoTime() != 0){
@@ -100,11 +112,12 @@ void MainWindow::processing(){
             execProcess->updateCpuTime();
 
             if(execProcess->getIoChannel() == 1){
-                qDebug()<<"Asignado a io 1";
+                logs.append("Proceso " + execProcess->getName() + " asignado a I/O₁");
+
                 ui->listWidgetInputOutputOne->addItem(execProcess->getName());
                 ioChannel = 1;
             } else {
-                qDebug()<<"Asignado a io 2";
+                logs.append("Proceso " + execProcess->getName() + " asignado a I/O₂");
                 ui->listWidgetInputOutputTwo->addItem(execProcess->getName());
                 ioChannel = 2;
             }
@@ -112,7 +125,7 @@ void MainWindow::processing(){
             processManager.moveProcessFromExecToIo(ioChannel);
 
             execProcess = processManager.getExecProcess();
-            qDebug()<<"Nuevo proceso: "<<execProcess->getName();
+            logs.append("Nuevo execProcess: "+execProcess->getName());
             ui->lineEditCurrentProcess->setText(execProcess->getName());
             delete ui->listWidgetReadyQueue->takeItem(0);
             verticalLineSeries(lastY);
@@ -121,7 +134,7 @@ void MainWindow::processing(){
 
         } else if(execProcess->getCpuTime() > 0){
 
-            qDebug()<<"Proceso "<<execProcess->getName()<<" movido al final";
+            logs.append("Proceso " + execProcess->getName() + " movido al final de la readyQueue");
 
             ui->listWidgetReadyQueue->addItem(ui->listWidgetReadyQueue->takeItem(0));
 
@@ -133,11 +146,11 @@ void MainWindow::processing(){
             delete ui->listWidgetReadyQueue->takeItem(0);
             verticalLineSeries(lastY);
 
-            qDebug()<<"Nuevo proceso: "<<execProcess->getName();
+            logs.append("Nuevo execProcess: "+execProcess->getName());
 
         } else {
 
-            qDebug()<<"Proceso muerto";
+            logs.append("Proceso " + execProcess->getName() + " terminado");
             markProcessKilled();
             processManager.killProcess();
             ui->lineEditCurrentProcess->setText("");
@@ -147,7 +160,7 @@ void MainWindow::processing(){
 
                 int lastY = execProcess->getAxisY();
                 execProcess = processManager.getExecProcess();
-                qDebug()<<"Nuevo proceso: "<<execProcess->getName();
+                logs.append("Nuevo execProcess: "+execProcess->getName());
                 ui->lineEditCurrentProcess->setText(execProcess->getName());
                 verticalLineSeries(lastY);
                 execProcess->substractTime();
@@ -160,11 +173,11 @@ void MainWindow::processing(){
 
     } else {
         execProcess->substractTime();
-        qDebug()<<"siga";
     }
 
     paintCoreChart();
     paintIoChart();
+    ui->listWidgetLogs->addItems(logs);
 
     if(x >= sliderValue){
         ui->graphicsView->horizontalScrollBar()->setValue(ui->graphicsView->horizontalScrollBar()->value() + 50);

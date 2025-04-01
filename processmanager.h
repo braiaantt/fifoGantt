@@ -22,9 +22,9 @@ public:
     ProcessManager();
 
     void addProcess(QString name, int arrivalTime, int firstCpuTime, int secondCpuTime, int ioTime, int ioChannel, int axisY);
-    void checkArrivalProcesses(int x);
+    QStringList checkArrivalProcesses(int x);
     int checkArrivalInputOutputProcesses();
-    void sortArrivalProcesses();
+    QStringList sortArrivalProcesses();
     void setArrivalProcessesOnReadyQueue();
     bool readyQueueIsEmpty();
     bool inputOutputOneIsEmpty();
