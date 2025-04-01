@@ -4,6 +4,7 @@
 #include "QTimer"
 #include "QLegendMarker"
 #include "QScatterSeries"
+#include <QMessageBox>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -407,6 +408,13 @@ void MainWindow::initInputOutputGraphic(){
 
 void MainWindow::on_pushButtonInitCharts_clicked()
 {
+
+    if(!checkInputsTableWidget()){
+
+        QMessageBox::warning(this, "Error", "En la tabla solo se permiten valores de tipo 'int' (Entero)");
+        return;
+    }
+
     QTableWidget* table = ui->tableWidgetProcessesData;
     QString name;
     int arrivalTime, firstCpuTime, secondCpuTime,inputOutputOne, inputOutputTwo, axisY;
@@ -434,3 +442,23 @@ void MainWindow::on_pushButtonInitCharts_clicked()
 
 }
 
+bool MainWindow::checkInputsTableWidget(){
+
+    QTableWidget* table = ui->tableWidgetProcessesData;
+
+    for(int i = 0; i<table->rowCount(); i++){
+
+        for(int j = 1; j<table->columnCount(); j++){
+
+            QTableWidgetItem *item = table->item(i,j);
+            bool isInt;
+            item->text().toInt(&isInt);
+            if(!isInt) return false;
+
+        }
+
+    }
+
+    return true;
+
+}

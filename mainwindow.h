@@ -61,5 +61,7 @@ private:
     void paintCoreChart();
     void createIoChartLineSeries(int);
 
+    bool checkInputsTableWidget();
+
 };
 #endif // MAINWINDOW_H
