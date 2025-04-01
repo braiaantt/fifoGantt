@@ -85,7 +85,7 @@
            <number>0</number>
           </property>
           <item>
-           <widget class="QTableWidget" name="tableWidget">
+           <widget class="QTableWidget" name="tableWidgetProcessesData">
             <property name="focusPolicy">
              <enum>Qt::NoFocus</enum>
             </property>
@@ -158,14 +158,14 @@
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_4">
             <item>
-             <widget class="QPushButton" name="pushButton">
+             <widget class="QPushButton" name="pushButtonInitCharts">
               <property name="text">
                <string>Iniciar</string>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QPushButton" name="pushButton_2">
+             <widget class="QPushButton" name="pushButtonRestartCharts">
               <property name="text">
                <string>Reiniciar</string>
               </property>
@@ -218,7 +218,7 @@
                </widget>
               </item>
               <item>
-               <widget class="QListWidget" name="listWidget"/>
+               <widget class="QListWidget" name="listWidgetReadyQueue"/>
               </item>
              </layout>
             </item>
@@ -232,7 +232,7 @@
                </widget>
               </item>
               <item>
-               <widget class="QListWidget" name="listWidget_2"/>
+               <widget class="QListWidget" name="listWidgetInputOutputOne"/>
               </item>
              </layout>
             </item>
@@ -246,7 +246,7 @@
                </widget>
               </item>
               <item>
-               <widget class="QListWidget" name="listWidget_3"/>
+               <widget class="QListWidget" name="listWidgetInputOutputTwo"/>
               </item>
              </layout>
             </item>
