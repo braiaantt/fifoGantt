@@ -8,20 +8,29 @@ class ProcessManager
 {
 
 private:
-    QVector<Process> readyQueue;
-    Process currentProcess;
-    int time;
+    QVector<std::shared_ptr<Process>> processes;
+    QVector<std::shared_ptr<Process>> readyQueue;
+    QVector<std::shared_ptr<Process>> inputOutputOne;
+    QVector<std::shared_ptr<Process>> inputOutputTwo;
+    QVector<std::shared_ptr<Process>> arrivalProcesses;
 
-    void removeProcess();
+    bool checkIoList(QVector<std::shared_ptr<Process>> &);
 
 public:
     ProcessManager();
 
-    void moveProcessTo(ProcessManager &);
-    void addProcessToReadyQueue(Process);
+    void addProcess(QString name, int arrivalTime, int firstCpuTime, int secondCpuTime, int ioTime, int ioChannel, int axisY);
+    void checkArrivalProcesses(int x);
+    int checkArrivalInputOutputProcesses();
+    void sortArrivalProcesses();
+    bool readyQueueIsEmpty();
+    void moveProcessFromReadyQueueToIo(int ioChannel);
+    void moveProcessToEnd();
+    void killProcess();
 
-    //Getters
-    int getTime();
+    //getters
+    QStringList getProcessesNames();
+    std::shared_ptr<Process> getCurrentProcess();
 
 };
 

@@ -17,7 +17,6 @@ MainWindow::MainWindow(QWidget *parent)
 
     colors = {Qt::red, Qt::blue, Qt::green, Qt::cyan, Qt::darkRed};
 
-    createProcesses();
     x = 0;
     sliderValue = 14;
 
@@ -40,6 +39,16 @@ MainWindow::~MainWindow()
     delete chartInputOutput;
 }
 
+void MainWindow::keyPressEvent(QKeyEvent* event){
+
+    if(event->key() == Qt::Key_Right) {
+        processing();
+    }
+
+    QMainWindow::keyPressEvent(event);
+
+}
+
 void MainWindow::processing(){
 
     qDebug()<<"";
@@ -47,93 +56,84 @@ void MainWindow::processing(){
     qDebug()<<"X: "<<x;
     qDebug()<<"";
 
-    checkArrivalProcesses();
+    processManager.checkArrivalProcesses(x);
 
-    qDebug()<<"---------inputOutputOne---------";
-    checkArrivalInputOutputProcesses(inputOutputOne, 1);
-    qDebug()<<"--------------------------------";
-    qDebug()<<"";
-    qDebug()<<"---------inputOutputTwo---------";
-    checkArrivalInputOutputProcesses(inputOutputTwo, 0);
-    qDebug()<<"--------------------------------";
-    qDebug()<<"";
+    int processesEnded = processManager.checkArrivalInputOutputProcesses();
 
-    sortArrivalProcesses();
+    if(processesEnded == 1){
+        lineSeriesInputOutputOne = nullptr;
+    } else if(processesEnded == 2){
+        lineSeriesInputOutputTwo = nullptr;
+    } else if(processesEnded == 3){
+        lineSeriesInputOutputOne = nullptr;
+        lineSeriesInputOutputTwo = nullptr;
+    }
+    paintIoChart();
 
-    if(readyQueue.empty()){
+
+    processManager.sortArrivalProcesses();
+
+    if(processManager.readyQueueIsEmpty()){
         qDebug()<<"ReadyQueue vacía!";
         return;
     }
 
-    qDebug()<<"------ReadyQueue------";
-    for(auto &process : readyQueue){
-        qDebug()<<process->getName();
-    }
-    qDebug()<<"----------------------";
-    qDebug()<<"";
-
-    std::shared_ptr<Process> &currentProcess = readyQueue[0];
+    std::shared_ptr<Process> currentProcess = processManager.getCurrentProcess();
 
     qDebug()<<"Trabajando proceso: "<<currentProcess->getName();
-
-    //updateCoords(x,currentProcess->getAxisY());
 
     if(currentProcess->getCpuTime() == 0){
 
         qDebug()<<"Tiempo cpu terminado";
         updateCoords(x,currentProcess->getAxisY());
-        //verticalLineSeries();
 
         if(currentProcess->getIoTime() != 0){
 
+            int ioChannel;
+            int lastY = currentProcess->getAxisY();
             currentProcess->updateCpuTime();
 
             if(currentProcess->getIoChannel() == 1){
                 qDebug()<<"Asignado a io 1";
-                inputOutputOne.append(currentProcess);
+                ioChannel = 1;
             } else {
                 qDebug()<<"Asignado a io 2";
-                inputOutputTwo.append(currentProcess);
+                ioChannel = 2;
             }
 
-            int lastY = currentProcess->getAxisY();
-            readyQueue.removeOne(currentProcess);
-            currentProcess = readyQueue[0];
+            processManager.moveProcessFromReadyQueueToIo(ioChannel);
+
+            currentProcess = processManager.getCurrentProcess();
             qDebug()<<"Nuevo proceso: "<<currentProcess->getName();
             verticalLineSeries(lastY);
-            /*updateCoords(x,currentProcess->getAxisY());
-            createLineSeries();
-            updateCoords(x,currentProcess->getAxisY());*/
+
             currentProcess->substractTime();
 
         } else if(currentProcess->getIoTime() > 0){
 
             qDebug()<<"Proceso "<<currentProcess->getName()<<" movido al final";
 
-            currentProcess->updateCpuTime();
             int lastY = currentProcess->getAxisY();
-            readyQueue.removeOne(currentProcess);
-            readyQueue.append(currentProcess);
+            currentProcess->updateCpuTime();
+            processManager.moveProcessToEnd();
+            currentProcess = processManager.getCurrentProcess();
             verticalLineSeries(lastY);
-            /*updateCoords(x,currentProcess->getAxisY());
-            createLineSeries();
-            updateCoords(x,currentProcess->getAxisY());*/
-            qDebug()<<"Nuevo proceso: "<<readyQueue[0]->getName();
+
+            qDebug()<<"Nuevo proceso: "<<currentProcess->getName();
 
         } else {
 
             qDebug()<<"Proceso muerto";
             markProcessKilled();
-            readyQueue.removeAt(0);
-            if(!readyQueue.empty()){
+            processManager.killProcess();//readyQueue.removeAt(0);
+            if(!processManager.readyQueueIsEmpty()){
+
                 int lastY = currentProcess->getAxisY();
-                currentProcess = readyQueue[0];
+                currentProcess = processManager.getCurrentProcess();
                 qDebug()<<"Nuevo proceso: "<<currentProcess->getName();
                 verticalLineSeries(lastY);
-                /*updateCoords(x,currentProcess->getAxisY());
-                createLineSeries();
-                updateCoords(x,currentProcess->getAxisY());*/
                 currentProcess->substractTime();
+
             } else {
                 qDebug()<<"No hay más procesos!";
             }
@@ -155,6 +155,7 @@ void MainWindow::processing(){
     x++;
 
 }
+
 
 void MainWindow::paintCoreChart(){
 
@@ -206,98 +207,6 @@ void MainWindow::createIoChartLineSeries(int ioChannel){
 
 }
 
-void MainWindow::checkArrivalProcesses(){
-
-    for(auto &process : processes){
-        if(process->getArrivalTime() == x){
-
-            arrivalProcesses.append(process);
-            qDebug()<<"Proceso"<< process->getName() <<"añadido a arrivalProcesses";
-
-        }
-    }
-
-}
-
-void MainWindow::checkArrivalInputOutputProcesses(QVector<std::shared_ptr<Process>> &ioList, int ioChannel){
-
-    if(!ioList.empty()){
-
-        std::shared_ptr<Process> currentProcess = ioList[0];
-
-        qDebug()<<"Proceso: "<<currentProcess->getName();
-        qDebug()<<"ioTime: "<<currentProcess->getIoTime();
-        ioList[0]->substractIoTime();
-        qDebug()<<"ioTimeDsp: "<<currentProcess->getIoTime();
-
-        if(currentProcess->getIoTime() == 0){
-
-            paintIoChart();
-            qDebug()<<"Proceso "<<currentProcess->getName()<<" añadido a arrivalProcesses";
-            arrivalProcesses.append(currentProcess);
-            ioList.removeOne(currentProcess);
-
-            if(ioChannel == 1){
-                lineSeriesInputOutputOne = nullptr;
-            } else {
-                lineSeriesInputOutputTwo = nullptr;
-            }
-
-        }
-
-    } else {
-        qDebug()<<"Lista vacía";
-    }
-
-}
-
-void MainWindow::sortArrivalProcesses(){
-
-    if(arrivalProcesses.empty()) return;
-
-    qDebug()<<"------ArrivalProcesses antes------";
-    for(auto &process : arrivalProcesses){
-        qDebug()<<process->getName();
-    }
-    qDebug()<<"-----------------------------------";
-
-    if(arrivalProcesses.size() == 1){
-
-        readyQueue.append(arrivalProcesses);
-
-    } else if(arrivalProcesses.size() > 1){
-
-        int size = arrivalProcesses.size();
-        for (int i = 0; i < size - 1; ++i) {
-            for (int j = 0; j < size - i - 1; ++j) {
-                if (arrivalProcesses[j]->getArrivalTime() > arrivalProcesses[j+1]->getArrivalTime()) {
-                    arrivalProcesses.swapItemsAt(j, j+1);
-                }
-            }
-        }
-
-        readyQueue.append(arrivalProcesses);
-    }
-
-    qDebug()<<"------ArrivalProcesses despues------";
-    for(auto &process : arrivalProcesses){
-        qDebug()<<process->getName();
-    }
-    qDebug()<<"-----------------------------------";
-    arrivalProcesses.clear();
-
-}
-
-void MainWindow::keyPressEvent(QKeyEvent* event){
-
-    if(event->key() == Qt::Key_Right) {
-        processing();
-    }
-
-    QMainWindow::keyPressEvent(event);
-
-}
-
 void MainWindow::initAxis(int &axisXCount){
 
     axisX = new QValueAxis();
@@ -311,8 +220,8 @@ void MainWindow::initAxis(int &axisXCount){
     axisX->setGridLineVisible(false);
 
     // Configuracion eje y
-    categories = {"A", "B", "C", "D", "E"};
-    axisY->append(categories);
+    QStringList processesNames = processManager.getProcessesNames();
+    axisY->append(processesNames);
     axisY->setGridLineVisible(false);
 
 }
@@ -330,7 +239,6 @@ void MainWindow::initCoreGraphic(){
 
     chart->addAxis(axisX, Qt::AlignBottom);
     chart->addAxis(axisY, Qt::AlignLeft);
-    //chart->setMinimumWidth(axisX->tickCount()*50);
 
     chartView->setRenderHint(QPainter::Antialiasing);
     chartView->setMinimumSize(axisX->tickCount() * 50, 300);
@@ -342,10 +250,12 @@ void MainWindow::initCoreGraphic(){
 
 void MainWindow::initLegends(){
 
-    for(int i = 0; i<categories.size(); i++){
+    QStringList processesNames = processManager.getProcessesNames();
+
+    for(int i = 0; i<processesNames.size(); i++){
         QLineSeries *legendSeries = new QLineSeries(chart);
         chart->addSeries(legendSeries);
-        legendSeries->setName(categories[i]);
+        legendSeries->setName(processesNames[i]);
         legendSeries->setColor(colors[i]);
     }
 
@@ -442,34 +352,4 @@ void MainWindow::initInputOutputGraphic(){
     scene->addWidget(chartView);
     ui->graphicsView_2->setScene(scene);
     chartView->setGeometry(0, 0, ui->graphicsView_2->width(), ui->graphicsView_2->height());
-}
-
-void MainWindow::createProcesses(){
-
-
-    processes.append(std::make_shared<Process>(
-        "A",  // name
-        3,    // arrivalTime
-        5,    // firstCpuTime
-        2,    // secondCpuTime
-        2,    // ioTime
-        1,    // ioChannel
-        0     // axisY
-        ));
-
-    // Proceso B
-    processes.append(std::make_shared<Process>(
-        "B", 0, 2, 4, 2, 0, 1
-        ));
-
-    // Proceso C
-    processes.append(std::make_shared<Process>(
-        "C", 1, 4, 3, 8, 1, 2
-        ));
-
-    // Proceso D
-    processes.append(std::make_shared<Process>(
-        "D", 4, 2, -1, 0, -1, 3
-        ));
-
 }

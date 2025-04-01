@@ -8,7 +8,7 @@
 #include <QtCharts/QBarCategoryAxis>
 #include <QtCharts/QValueAxis>
 #include <QtCharts/QLineSeries>
-#include "process.h"
+#include "processmanager.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -33,19 +33,14 @@ private:
     QBarCategoryAxis *axisY;
     QValueAxis *axisXInputOutput;
     QBarCategoryAxis *axisYInputOutput;
+    ProcessManager processManager;
 
-    QStringList categories;
     QVector<QColor> colors;
     int x;
     int sliderValue;
     QLineSeries* currentLineSeries;
     QLineSeries* lineSeriesInputOutputOne;
     QLineSeries* lineSeriesInputOutputTwo;
-    QVector<std::shared_ptr<Process>> processes;
-    QVector<std::shared_ptr<Process>> readyQueue;
-    QVector<std::shared_ptr<Process>> inputOutputOne;
-    QVector<std::shared_ptr<Process>> inputOutputTwo;
-    QVector<std::shared_ptr<Process>> arrivalProcesses;
 
     void updateCoords(int x, int y);
     void createLineSeries();
@@ -58,10 +53,6 @@ private:
     void initLegends();
 
     void processing();
-    void checkArrivalProcesses();
-    void checkArrivalInputOutputProcesses(QVector<std::shared_ptr<Process>> &, int);
-    void sortArrivalProcesses();
-    void createProcesses();
     void paintIoChart();
     void paintCoreChart();
     void createIoChartLineSeries(int);
