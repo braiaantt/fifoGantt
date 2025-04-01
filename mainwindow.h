@@ -49,7 +49,7 @@ private:
 
     void updateCoords(int x, int y);
     void createLineSeries();
-    void verticalLineSeries();
+    void verticalLineSeries(int lastY);
     void markProcessKilled();
 
     void initCoreGraphic();
@@ -63,6 +63,7 @@ private:
     void sortArrivalProcesses();
     void createProcesses();
     void paintIoChart();
+    void paintCoreChart();
     void createIoChartLineSeries(int);
 
 };

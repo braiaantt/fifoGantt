@@ -11,7 +11,9 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
-
+    currentLineSeries = nullptr;
+    lineSeriesInputOutputOne = nullptr;
+    lineSeriesInputOutputTwo = nullptr;
 
     colors = {Qt::red, Qt::blue, Qt::green, Qt::cyan, Qt::darkRed};
 
@@ -21,11 +23,8 @@ MainWindow::MainWindow(QWidget *parent)
 
     initCoreGraphic();
     initLegends();
-    createLineSeries();
 
     initInputOutputGraphic();
-    createIoChartLineSeries(1);
-    createIoChartLineSeries(0);
 
     QTimer::singleShot(0, this,[this](){
         ui->graphicsView->horizontalScrollBar()->setValue(0);
@@ -77,13 +76,13 @@ void MainWindow::processing(){
 
     qDebug()<<"Trabajando proceso: "<<currentProcess->getName();
 
-    updateCoords(x,currentProcess->getAxisY());
+    //updateCoords(x,currentProcess->getAxisY());
 
     if(currentProcess->getCpuTime() == 0){
 
         qDebug()<<"Tiempo cpu terminado";
         updateCoords(x,currentProcess->getAxisY());
-        verticalLineSeries();
+        //verticalLineSeries();
 
         if(currentProcess->getIoTime() != 0){
 
@@ -92,19 +91,19 @@ void MainWindow::processing(){
             if(currentProcess->getIoChannel() == 1){
                 qDebug()<<"Asignado a io 1";
                 inputOutputOne.append(currentProcess);
-                lineSeriesInputOutputOne->setColor(colors[inputOutputOne[0]->getAxisY()]);
             } else {
                 qDebug()<<"Asignado a io 2";
                 inputOutputTwo.append(currentProcess);
-                lineSeriesInputOutputTwo->setColor(colors[inputOutputTwo[0]->getAxisY()]);
             }
 
+            int lastY = currentProcess->getAxisY();
             readyQueue.removeOne(currentProcess);
             currentProcess = readyQueue[0];
             qDebug()<<"Nuevo proceso: "<<currentProcess->getName();
-            updateCoords(x,currentProcess->getAxisY());
+            verticalLineSeries(lastY);
+            /*updateCoords(x,currentProcess->getAxisY());
             createLineSeries();
-            updateCoords(x,currentProcess->getAxisY());
+            updateCoords(x,currentProcess->getAxisY());*/
             currentProcess->substractTime();
 
         } else if(currentProcess->getIoTime() > 0){
@@ -112,11 +111,13 @@ void MainWindow::processing(){
             qDebug()<<"Proceso "<<currentProcess->getName()<<" movido al final";
 
             currentProcess->updateCpuTime();
+            int lastY = currentProcess->getAxisY();
             readyQueue.removeOne(currentProcess);
             readyQueue.append(currentProcess);
-            updateCoords(x,currentProcess->getAxisY());
+            verticalLineSeries(lastY);
+            /*updateCoords(x,currentProcess->getAxisY());
             createLineSeries();
-            updateCoords(x,currentProcess->getAxisY());
+            updateCoords(x,currentProcess->getAxisY());*/
             qDebug()<<"Nuevo proceso: "<<readyQueue[0]->getName();
 
         } else {
@@ -125,11 +126,13 @@ void MainWindow::processing(){
             markProcessKilled();
             readyQueue.removeAt(0);
             if(!readyQueue.empty()){
+                int lastY = currentProcess->getAxisY();
                 currentProcess = readyQueue[0];
                 qDebug()<<"Nuevo proceso: "<<currentProcess->getName();
-                updateCoords(x,currentProcess->getAxisY());
+                verticalLineSeries(lastY);
+                /*updateCoords(x,currentProcess->getAxisY());
                 createLineSeries();
-                updateCoords(x,currentProcess->getAxisY());
+                updateCoords(x,currentProcess->getAxisY());*/
                 currentProcess->substractTime();
             } else {
                 qDebug()<<"No hay más procesos!";
@@ -141,6 +144,7 @@ void MainWindow::processing(){
         currentProcess->substractTime();
     }
 
+    paintCoreChart();
     paintIoChart();
 
     if(x >= sliderValue){
@@ -152,13 +156,29 @@ void MainWindow::processing(){
 
 }
 
+void MainWindow::paintCoreChart(){
+
+    if(currentLineSeries == nullptr){
+
+        createLineSeries();
+
+    }
+
+    if(!readyQueue.empty()){
+        updateCoords(x, readyQueue[0]->getAxisY());
+    }
+
+}
+
 void MainWindow::paintIoChart(){
 
     if(!inputOutputOne.empty()){
+        if(lineSeriesInputOutputOne == nullptr) createIoChartLineSeries(1);
         lineSeriesInputOutputOne->append(x, 1);
     }
 
     if(!inputOutputTwo.empty()){
+        if(lineSeriesInputOutputTwo == nullptr) createIoChartLineSeries(0);
         lineSeriesInputOutputTwo->append(x, 0);
     }
 
@@ -173,8 +193,10 @@ void MainWindow::createIoChartLineSeries(int ioChannel){
 
     if(ioChannel == 1){
         lineSeriesInputOutputOne = lineSeries;
+        lineSeries->setColor(colors[inputOutputOne[0]->getAxisY()]);
     } else {
         lineSeriesInputOutputTwo = lineSeries;
+        lineSeries->setColor(colors[inputOutputTwo[0]->getAxisY()]);
     }
 
     auto markers = chartInputOutput->legend()->markers(lineSeries);
@@ -216,9 +238,9 @@ void MainWindow::checkArrivalInputOutputProcesses(QVector<std::shared_ptr<Proces
             ioList.removeOne(currentProcess);
 
             if(ioChannel == 1){
-                createIoChartLineSeries(1);
+                lineSeriesInputOutputOne = nullptr;
             } else {
-                createIoChartLineSeries(0);
+                lineSeriesInputOutputTwo = nullptr;
             }
 
         }
@@ -329,7 +351,7 @@ void MainWindow::initLegends(){
 
 }
 
-void MainWindow::verticalLineSeries(){
+void MainWindow::verticalLineSeries(int lastY){
 
     createLineSeries();
     QPen pen;
@@ -337,7 +359,10 @@ void MainWindow::verticalLineSeries(){
     pen.setColor(Qt::gray);
     currentLineSeries->setPen(pen);
 
+    updateCoords(x,lastY);
     updateCoords(x,readyQueue[0]->getAxisY());
+
+    currentLineSeries = nullptr;
 
 }
 
