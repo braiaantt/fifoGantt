@@ -20,16 +20,6 @@ MainWindow::MainWindow(QWidget *parent)
     x = 0;
     sliderValue = 14;
 
-    initCoreGraphic();
-    initLegends();
-
-    initInputOutputGraphic();
-
-    QTimer::singleShot(0, this,[this](){
-        ui->graphicsView->horizontalScrollBar()->setValue(0);
-        ui->graphicsView_2->horizontalScrollBar()->setValue(0);
-    });
-
 }
 
 MainWindow::~MainWindow()
@@ -50,11 +40,6 @@ void MainWindow::keyPressEvent(QKeyEvent* event){
 }
 
 void MainWindow::processing(){
-
-    qDebug()<<"";
-    qDebug()<<"";
-    qDebug()<<"X: "<<x;
-    qDebug()<<"";
 
     processManager.checkArrivalProcesses(x);
 
@@ -109,7 +94,7 @@ void MainWindow::processing(){
 
             currentProcess->substractTime();
 
-        } else if(currentProcess->getIoTime() > 0){
+        } else if(currentProcess->getCpuTime() > 0){
 
             qDebug()<<"Proceso "<<currentProcess->getName()<<" movido al final";
 
@@ -156,7 +141,6 @@ void MainWindow::processing(){
 
 }
 
-
 void MainWindow::paintCoreChart(){
 
     if(currentLineSeries == nullptr){
@@ -165,20 +149,20 @@ void MainWindow::paintCoreChart(){
 
     }
 
-    if(!readyQueue.empty()){
-        updateCoords(x, readyQueue[0]->getAxisY());
+    if(!processManager.readyQueueIsEmpty()){
+        updateCoords(x, processManager.getCurrentProcess()->getAxisY());
     }
 
 }
 
 void MainWindow::paintIoChart(){
 
-    if(!inputOutputOne.empty()){
+    if(!processManager.inputOutputOneIsEmpty()){
         if(lineSeriesInputOutputOne == nullptr) createIoChartLineSeries(1);
         lineSeriesInputOutputOne->append(x, 1);
     }
 
-    if(!inputOutputTwo.empty()){
+    if(!processManager.inputOutputTwoIsEmpty()){
         if(lineSeriesInputOutputTwo == nullptr) createIoChartLineSeries(0);
         lineSeriesInputOutputTwo->append(x, 0);
     }
@@ -194,10 +178,10 @@ void MainWindow::createIoChartLineSeries(int ioChannel){
 
     if(ioChannel == 1){
         lineSeriesInputOutputOne = lineSeries;
-        lineSeries->setColor(colors[inputOutputOne[0]->getAxisY()]);
+        lineSeries->setColor(colors[processManager.getCurrentIoOneProcess()->getAxisY()]);
     } else {
         lineSeriesInputOutputTwo = lineSeries;
-        lineSeries->setColor(colors[inputOutputTwo[0]->getAxisY()]);
+        lineSeries->setColor(colors[processManager.getCurrentIoTwoProcess()->getAxisY()]);
     }
 
     auto markers = chartInputOutput->legend()->markers(lineSeries);
@@ -207,27 +191,29 @@ void MainWindow::createIoChartLineSeries(int ioChannel){
 
 }
 
-void MainWindow::initAxis(int &axisXCount){
+void MainWindow::initAxis(){
 
+    int axisXCount = calcAxisCount(); //valor calculado por el resultado de la suma de los tiempos de nucleo
+    qDebug()<<"aca";
     axisX = new QValueAxis();
     axisY = new QBarCategoryAxis();
-
+    qDebug()<<"aca";
     //Configuracion eje x
     axisX->setRange(0, axisXCount);
     axisX->setTickCount(axisXCount+1);
     axisX->setLabelFormat("%.0f");
     axisX->setTitleText("Tiempo");
     axisX->setGridLineVisible(false);
-
+    qDebug()<<"aca";
     // Configuracion eje y
     QStringList processesNames = processManager.getProcessesNames();
     axisY->append(processesNames);
     axisY->setGridLineVisible(false);
+    qDebug()<<"aca";
 
 }
 
 void MainWindow::initCoreGraphic(){
-    int axisXCount = 30; //valor calculado por el resultado de la suma de los tiempos de nucleo
 
     chart = new QChart();
     QChartView *chartView = new QChartView(chart);
@@ -235,7 +221,7 @@ void MainWindow::initCoreGraphic(){
 
     chart->setAnimationOptions(QChart::SeriesAnimations);
 
-    initAxis(axisXCount);
+    initAxis();
 
     chart->addAxis(axisX, Qt::AlignBottom);
     chart->addAxis(axisY, Qt::AlignLeft);
@@ -245,6 +231,28 @@ void MainWindow::initCoreGraphic(){
     scene->addWidget(chartView);
     ui->graphicsView->setScene(scene);
     chartView->setGeometry(0, 0, ui->graphicsView->width(), ui->graphicsView->height());
+    ui->graphicsView->horizontalScrollBar()->setValue(0);
+
+}
+
+int MainWindow::calcAxisCount(){
+
+    QTableWidget *table = ui->tableWidgetProcessesData;
+
+    int totalCpuTime = 0;
+
+    for(int i = 0; i<table->rowCount(); i++){
+        qDebug()<<"i "<<i;
+        int firstCpuTime = table->item(i,2)->text().toInt();
+        int secondCpuTime = table->item(i,5)->text().toInt();
+        totalCpuTime += firstCpuTime + secondCpuTime;
+
+        qDebug()<<"total: "<<totalCpuTime;
+
+    }
+
+    qDebug()<<"total: "<<totalCpuTime;
+    return totalCpuTime;
 
 }
 
@@ -270,7 +278,7 @@ void MainWindow::verticalLineSeries(int lastY){
     currentLineSeries->setPen(pen);
 
     updateCoords(x,lastY);
-    updateCoords(x,readyQueue[0]->getAxisY());
+    updateCoords(x,processManager.getCurrentProcess()->getAxisY());
 
     currentLineSeries = nullptr;
 
@@ -290,8 +298,8 @@ void MainWindow::createLineSeries(){
     lineSeries->attachAxis(axisX);
     currentLineSeries = lineSeries;
 
-    if(!readyQueue.empty()){
-        lineSeries->setColor(colors[readyQueue[0]->getAxisY()]);
+    if(!processManager.readyQueueIsEmpty()){
+        lineSeries->setColor(colors[processManager.getCurrentProcess()->getAxisY()]);
     }
 
     auto markers = chart->legend()->markers(lineSeries);
@@ -309,8 +317,8 @@ void MainWindow::markProcessKilled(){
     point->attachAxis(axisX);
     point->setPointsVisible(true);
 
-    if(!readyQueue.empty()){
-        point->setColor(colors[readyQueue[0]->getAxisY()]);
+    if(!processManager.readyQueueIsEmpty()){
+        point->setColor(colors[processManager.getCurrentProcess()->getAxisY()]);
     }
 
     auto markers = chart->legend()->markers(point);
@@ -318,7 +326,7 @@ void MainWindow::markProcessKilled(){
         markers.first()->setVisible(false); // Oculta el marcador en la leyenda
     }
 
-    point->append(x,readyQueue[0]->getAxisY());
+    point->append(x,processManager.getCurrentProcess()->getAxisY());
 
 }
 
@@ -352,4 +360,35 @@ void MainWindow::initInputOutputGraphic(){
     scene->addWidget(chartView);
     ui->graphicsView_2->setScene(scene);
     chartView->setGeometry(0, 0, ui->graphicsView_2->width(), ui->graphicsView_2->height());
+    ui->graphicsView_2->horizontalScrollBar()->setValue(0);
 }
+
+void MainWindow::on_pushButtonInitCharts_clicked()
+{
+    QTableWidget* table = ui->tableWidgetProcessesData;
+    QString name;
+    int arrivalTime, firstCpuTime, secondCpuTime,inputOutputOne, inputOutputTwo, axisY;
+
+    for(int i = 0; i<table->rowCount(); i++){
+
+        name = table->item(i, 0)->text();
+        arrivalTime = table->item(i,1)->text().toInt();
+        firstCpuTime = table->item(i,2)->text().toInt();
+        inputOutputOne = table->item(i,3)->text().toInt();
+        inputOutputTwo = table->item(i,4)->text().toInt();
+        secondCpuTime = table->item(i,5)->text().toInt();
+
+        if(inputOutputOne != 0){
+            processManager.addProcess(name,arrivalTime,firstCpuTime,secondCpuTime,inputOutputOne,1,1);
+        } else {
+            processManager.addProcess(name,arrivalTime,firstCpuTime,secondCpuTime,inputOutputTwo,0,0);
+        }
+
+    }
+
+    initCoreGraphic();
+    initLegends();
+    initInputOutputGraphic();
+
+}
+

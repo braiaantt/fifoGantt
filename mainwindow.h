@@ -25,6 +25,9 @@ public:
 protected:
     void keyPressEvent(QKeyEvent *event) override;
 
+private slots:
+    void on_pushButtonInitCharts_clicked();
+
 private:
     Ui::MainWindow *ui;
     QChart *chart;
@@ -49,8 +52,9 @@ private:
 
     void initCoreGraphic();
     void initInputOutputGraphic();
-    void initAxis(int &axisXCount);
+    void initAxis();
     void initLegends();
+    int calcAxisCount();
 
     void processing();
     void paintIoChart();

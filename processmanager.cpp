@@ -117,6 +117,13 @@ bool ProcessManager::readyQueueIsEmpty(){
 
 }
 
+bool ProcessManager::inputOutputOneIsEmpty(){
+    return inputOutputOne.empty();
+}
+
+bool ProcessManager::inputOutputTwoIsEmpty(){
+    return inputOutputTwo.empty();
+}
 
 void ProcessManager::moveProcessFromReadyQueueToIo(int ioChannel){
 
@@ -158,4 +165,12 @@ QStringList ProcessManager::getProcessesNames(){
 
 std::shared_ptr<Process> ProcessManager::getCurrentProcess(){
     return readyQueue[0];
+}
+
+std::shared_ptr<Process> ProcessManager::getCurrentIoOneProcess(){
+    return inputOutputOne[0];
+}
+
+std::shared_ptr<Process> ProcessManager::getCurrentIoTwoProcess(){
+    return inputOutputTwo[0];
 }

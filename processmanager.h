@@ -24,6 +24,8 @@ public:
     int checkArrivalInputOutputProcesses();
     void sortArrivalProcesses();
     bool readyQueueIsEmpty();
+    bool inputOutputOneIsEmpty();
+    bool inputOutputTwoIsEmpty();
     void moveProcessFromReadyQueueToIo(int ioChannel);
     void moveProcessToEnd();
     void killProcess();
@@ -31,6 +33,8 @@ public:
     //getters
     QStringList getProcessesNames();
     std::shared_ptr<Process> getCurrentProcess();
+    std::shared_ptr<Process> getCurrentIoOneProcess();
+    std::shared_ptr<Process> getCurrentIoTwoProcess();
 
 };
 
