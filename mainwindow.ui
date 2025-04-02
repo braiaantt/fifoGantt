@@ -298,6 +298,13 @@
               </property>
              </widget>
             </item>
+            <item>
+             <widget class="QPushButton" name="pushButtonAddProcess">
+              <property name="text">
+               <string>Agregar Proceso</string>
+              </property>
+             </widget>
+            </item>
            </layout>
           </item>
          </layout>

@@ -30,6 +30,8 @@ private slots:
 
     void on_pushButtonRestartCharts_clicked();
 
+    void on_pushButtonAddProcess_clicked();
+
 private:
     Ui::MainWindow *ui;
     QChart* chart;

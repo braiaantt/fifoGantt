@@ -27,6 +27,7 @@ MainWindow::MainWindow(QWidget *parent)
     axisYInputOutput = nullptr;
 
     colors = {Qt::red, Qt::blue, Qt::green, Qt::cyan, Qt::darkRed};
+    ui->tableWidgetProcessesData->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 
     x = 0;
     sliderValue = 14;
@@ -549,6 +550,21 @@ void MainWindow::on_pushButtonRestartCharts_clicked()
 
     ui->lineEditCurrentProcess->clear();
     ui->lineEditCurrentTimePos->clear();
+
+}
+
+
+void MainWindow::on_pushButtonAddProcess_clicked()
+{
+
+    QTableWidget* table = ui->tableWidgetProcessesData;
+    int rowCount = table->rowCount();
+    table->insertRow(rowCount);
+
+    for(int column = 0; column< table->columnCount(); column++){
+        QTableWidgetItem *item = new QTableWidgetItem();
+        table->setItem(rowCount, column, item);
+    }
 
 }
 
