@@ -25,6 +25,7 @@ MainWindow::MainWindow(QWidget *parent)
     axisX = nullptr;
     axisXInputOutput = nullptr;
     axisYInputOutput = nullptr;
+    initButtonClicked = false;
 
     colors = {Qt::red, Qt::blue, Qt::green, Qt::cyan, Qt::darkRed};
     ui->tableWidgetProcessesData->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
@@ -424,6 +425,13 @@ void MainWindow::initInputOutputGraphic(){
 void MainWindow::on_pushButtonInitCharts_clicked()
 {
 
+    if(initButtonClicked){
+        ui->pushButtonRestartCharts->click();
+        processManager.deleteProcesses();
+    } else {
+        initButtonClicked = true;
+    }
+
     if(!checkInputsTableWidget()){
 
         QMessageBox::warning(this, "Error", "En la tabla solo se permiten valores de tipo 'int' (Entero)");
@@ -505,7 +513,6 @@ bool MainWindow::checkIoInputs(){
 
 void MainWindow::on_pushButtonRestartCharts_clicked()
 {
-
 
     delete chart;
     delete chartInputOutput;

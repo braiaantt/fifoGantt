@@ -34,6 +34,7 @@ public:
     void removeProcessFromIo(int ioChannel);
     void killProcess();
     void reset();
+    void deleteProcesses();
 
     //getters
     QStringList getProcessesNames();

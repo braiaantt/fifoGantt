@@ -45,6 +45,7 @@ private:
     QValueAxis *axisXInputOutput;
     QBarCategoryAxis *axisYInputOutput;
     ProcessManager processManager;
+    bool initButtonClicked;
 
     QVector<QColor> colors;
     int x;

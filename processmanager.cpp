@@ -190,6 +190,12 @@ void ProcessManager::reset(){
 
 }
 
+void ProcessManager::deleteProcesses(){
+
+    processes.clear();
+
+}
+
 //getters
 
 QStringList ProcessManager::getProcessesNames(){
