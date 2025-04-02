@@ -186,7 +186,9 @@ void MainWindow::processing(){
 
     paintCoreChart();
     paintIoChart();
+    if(!logs.empty()) logs << "";
     ui->listWidgetLogs->addItems(logs);
+    ui->listWidgetLogs->scrollToBottom();
 
     if(x >= sliderValue){
         ui->graphicsView->horizontalScrollBar()->setValue(ui->graphicsView->horizontalScrollBar()->value() + 50);
@@ -305,7 +307,7 @@ int MainWindow::calcAxisCount(){
 
     }
 
-    return totalCpuTime;
+    return totalCpuTime + 10;
 
 }
 
