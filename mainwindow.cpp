@@ -12,6 +12,7 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    this->setWindowTitle("Fifo en gráfico de Gantt");
 
     chart = nullptr;
     chartInputOutput = nullptr;
@@ -35,6 +36,8 @@ MainWindow::MainWindow(QWidget *parent)
 
     x = 0;
     sliderValue = 14;
+
+
 
 }
 
