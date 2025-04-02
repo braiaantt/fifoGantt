@@ -28,10 +28,16 @@ protected:
 private slots:
     void on_pushButtonInitCharts_clicked();
 
+    void on_pushButtonRestartCharts_clicked();
+
 private:
     Ui::MainWindow *ui;
-    QChart *chart;
-    QChart *chartInputOutput;
+    QChart* chart;
+    QChart * chartInputOutput;
+    QChartView* chartView;
+    QChartView* chartViewInputOutput;
+    QGraphicsScene* scene;
+    QGraphicsScene* sceneInputOutput;
     QValueAxis *axisX;
     QBarCategoryAxis *axisY;
     QValueAxis *axisXInputOutput;

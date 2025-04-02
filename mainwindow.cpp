@@ -14,9 +14,17 @@ MainWindow::MainWindow(QWidget *parent)
 
     chart = nullptr;
     chartInputOutput = nullptr;
+    chartView = nullptr;
+    chartViewInputOutput = nullptr;
+    scene = nullptr;
+    sceneInputOutput = nullptr;
     currentLineSeries = nullptr;
     lineSeriesInputOutputOne = nullptr;
     lineSeriesInputOutputTwo = nullptr;
+    axisY = nullptr;
+    axisX = nullptr;
+    axisXInputOutput = nullptr;
+    axisYInputOutput = nullptr;
 
     colors = {Qt::red, Qt::blue, Qt::green, Qt::cyan, Qt::darkRed};
 
@@ -243,8 +251,8 @@ void MainWindow::initAxis(){
 
     int axisXCount = calcAxisCount(); //valor calculado por el resultado de la suma de los tiempos de nucleo
 
-    axisX = new QValueAxis();
-    axisY = new QBarCategoryAxis();
+    axisX = new QValueAxis(chart);
+    axisY = new QBarCategoryAxis(chart);
 
     //Configuracion eje x
     axisX->setRange(0, axisXCount);
@@ -262,9 +270,9 @@ void MainWindow::initAxis(){
 
 void MainWindow::initCoreGraphic(){
 
+    chartView = new QChartView();
     chart = new QChart();
-    QChartView *chartView = new QChartView(chart);
-    QGraphicsScene *scene = new QGraphicsScene(chart);
+    scene = new QGraphicsScene();
 
     chart->setAnimationOptions(QChart::SeriesAnimations);
 
@@ -273,6 +281,7 @@ void MainWindow::initCoreGraphic(){
     chart->addAxis(axisX, Qt::AlignBottom);
     chart->addAxis(axisY, Qt::AlignLeft);
 
+    chartView->setChart(chart);
     chartView->setRenderHint(QPainter::Antialiasing);
     chartView->setMinimumSize(axisX->tickCount() * 50, 300);
     scene->addWidget(chartView);
@@ -376,8 +385,9 @@ void MainWindow::markProcessKilled(){
 void MainWindow::initInputOutputGraphic(){
 
     chartInputOutput = new QChart();
-    QChartView *chartView = new QChartView(chartInputOutput);
-    QGraphicsScene *scene = new QGraphicsScene(chartInputOutput);
+    chartViewInputOutput = new QChartView();
+    sceneInputOutput = new QGraphicsScene();
+
     axisYInputOutput = new QBarCategoryAxis(chartInputOutput);
     chartInputOutput->setAnimationOptions(QChart::SeriesAnimations);
 
@@ -398,12 +408,14 @@ void MainWindow::initInputOutputGraphic(){
     chartInputOutput->addAxis(axisXInputOutput, Qt::AlignBottom);
     chartInputOutput->addAxis(axisYInputOutput, Qt::AlignLeft);
 
-    chartView->setMinimumSize(axisX->tickCount() * 50, 230);
-    chartView->setRenderHint(QPainter::Antialiasing);
-    scene->addWidget(chartView);
-    ui->graphicsView_2->setScene(scene);
-    chartView->setGeometry(0, 0, ui->graphicsView_2->width(), ui->graphicsView_2->height());
+    chartViewInputOutput->setChart(chartInputOutput);
+    chartViewInputOutput->setMinimumSize(axisX->tickCount() * 50, 230);
+    chartViewInputOutput->setRenderHint(QPainter::Antialiasing);
+    sceneInputOutput->addWidget(chartViewInputOutput);
+    ui->graphicsView_2->setScene(sceneInputOutput);
+    chartViewInputOutput->setGeometry(0, 0, ui->graphicsView_2->width(), ui->graphicsView_2->height());
     ui->graphicsView_2->horizontalScrollBar()->setValue(0);
+
 }
 
 void MainWindow::on_pushButtonInitCharts_clicked()
@@ -487,3 +499,54 @@ bool MainWindow::checkIoInputs(){
     return true;
 
 }
+
+void MainWindow::on_pushButtonRestartCharts_clicked()
+{
+
+
+    delete chart;
+    delete chartInputOutput;
+    delete chartView;
+    delete chartViewInputOutput;
+    delete scene;
+    delete sceneInputOutput;
+
+    chart = nullptr;
+    chartInputOutput = nullptr;
+    chartView = nullptr;
+    chartViewInputOutput = nullptr;
+    scene = nullptr;
+    sceneInputOutput = nullptr;
+
+    currentLineSeries = nullptr;
+    lineSeriesInputOutputOne = nullptr;
+    lineSeriesInputOutputTwo = nullptr;
+
+    axisX = nullptr;
+    axisY = nullptr;
+    axisXInputOutput = nullptr;
+    axisYInputOutput = nullptr;
+
+    initCoreGraphic();
+
+    initLegends();
+
+    initInputOutputGraphic();
+
+    x = 0;
+    ui->graphicsView->horizontalScrollBar()->setValue(0);
+    ui->graphicsView_2->horizontalScrollBar()->setValue(0);
+    processManager.reset();
+
+    ui->listWidgetInputOutputOne->clear();
+    ui->listWidgetInputOutputTwo->clear();
+    ui->listWidgetLogs->clear();
+    ui->listWidgetReadyQueue->clear();
+
+    ui->pushButtonRestartCharts->clearFocus();
+
+    ui->lineEditCurrentProcess->clear();
+    ui->lineEditCurrentTimePos->clear();
+
+}
+

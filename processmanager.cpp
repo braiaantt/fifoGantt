@@ -174,6 +174,22 @@ void ProcessManager::updateExecProcess(){
 
 }
 
+void ProcessManager::reset(){
+
+    readyQueue.clear();
+    inputOutputOne.clear();
+    inputOutputTwo.clear();
+    arrivalProcesses.clear();
+    execProcess = nullptr;
+
+    for(auto &process : processes){
+        process->resetAuxIoTime();
+        process->resetCpuTime();
+    }
+
+
+}
+
 //getters
 
 QStringList ProcessManager::getProcessesNames(){

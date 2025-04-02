@@ -33,6 +33,7 @@ public:
     void moveProcessToEnd();
     void removeProcessFromIo(int ioChannel);
     void killProcess();
+    void reset();
 
     //getters
     QStringList getProcessesNames();

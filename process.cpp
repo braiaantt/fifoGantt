@@ -17,6 +17,7 @@ Process::Process(QString name, int arrivalTime, int firstCpuTime, int secondCpuT
 
     timeFinished = false;
     cpuTime = firstCpuTime;
+    auxIoTime = ioTime;
 
 }
 
@@ -28,8 +29,20 @@ void Process::substractTime(){
 
 void Process::substractIoTime(){
 
-    ioTime--;
+    auxIoTime--;
 
+}
+
+void Process::resetAuxIoTime(){
+    auxIoTime = ioTime;
+}
+
+void Process::resetCpuTime(){
+    if(firstCpuTime != 0){
+        cpuTime = firstCpuTime;
+    } else {
+        cpuTime = secondCpuTime;
+    }
 }
 
 void Process::checkTimeFinished(int &time){
@@ -77,7 +90,7 @@ int Process::getSecondCpuTime(){
 }
 
 int Process::getIoTime(){
-    return ioTime;
+    return auxIoTime;
 }
 
 int Process::getIoChannel(){

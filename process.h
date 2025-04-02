@@ -13,6 +13,7 @@ private:
     int firstCpuTime;
     int secondCpuTime;
     int ioTime;
+    int auxIoTime;
     int ioChannel;
     int axisY;
 
@@ -30,6 +31,8 @@ public:
 
     //Setters
     void setTimeFinished(bool);
+    void resetAuxIoTime();
+    void resetCpuTime();
 
     //Getters
     QString getName();
