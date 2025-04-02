@@ -9,6 +9,7 @@
 #include <QtCharts/QValueAxis>
 #include <QtCharts/QLineSeries>
 #include "processmanager.h"
+#include <QTableWidgetItem>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -26,6 +27,9 @@ protected:
     void keyPressEvent(QKeyEvent *event) override;
 
 private slots:
+    void showContextMenu(const QPoint&);
+
+
     void on_pushButtonInitCharts_clicked();
 
     void on_pushButtonRestartCharts_clicked();

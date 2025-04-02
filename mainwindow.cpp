@@ -5,6 +5,7 @@
 #include "QLegendMarker"
 #include "QScatterSeries"
 #include <QMessageBox>
+#include <QMenu>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -30,6 +31,8 @@ MainWindow::MainWindow(QWidget *parent)
     colors = {Qt::red, Qt::blue, Qt::green, Qt::cyan, Qt::darkRed};
     ui->tableWidgetProcessesData->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 
+    connect(ui->tableWidgetProcessesData, &QTableWidget::customContextMenuRequested, this, &MainWindow::showContextMenu);
+
     x = 0;
     sliderValue = 14;
 
@@ -49,6 +52,29 @@ void MainWindow::keyPressEvent(QKeyEvent* event){
     }
 
     QMainWindow::keyPressEvent(event);
+
+}
+
+void MainWindow::showContextMenu(const QPoint &point){
+
+    QTableWidgetItem *item = ui->tableWidgetProcessesData->itemAt(point);
+    if(!item) return;
+
+    ui->tableWidgetProcessesData->setSelectionBehavior(QAbstractItemView::SelectRows);
+    ui->tableWidgetProcessesData->selectRow(item->row());
+
+    QMenu menu(this);
+    QAction *deleteAction = menu.addAction("Eliminar proceso");
+
+    QAction *selectedAction = menu.exec(ui->tableWidgetProcessesData->viewport()->mapToGlobal(point));
+
+    if(deleteAction == selectedAction){
+        int row = item->row();
+        ui->tableWidgetProcessesData->removeRow(row);
+    }
+
+    ui->tableWidgetProcessesData->setSelectionBehavior(QAbstractItemView::SelectItems);
+    ui->tableWidgetProcessesData->clearSelection();
 
 }
 
@@ -574,4 +600,3 @@ void MainWindow::on_pushButtonAddProcess_clicked()
     }
 
 }
-
